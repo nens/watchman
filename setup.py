@@ -9,12 +9,14 @@ long_description = '\n\n'.join([
     ])
 
 install_requires = [
+    'celery',
+    'pyinotify',
     'setuptools',
     ],
 
 tests_require = [
-    'nose',
     'coverage',
+    'nose',
     ]
 
 setup(name='watchman',
@@ -36,5 +38,6 @@ setup(name='watchman',
       extras_require={'test': tests_require},
       entry_points={
           'console_scripts': [
+              'notify = watchman.notify:main',
           ]},
       )
