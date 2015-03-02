@@ -11,8 +11,9 @@ long_description = '\n\n'.join([
 install_requires = [
     'celery',
     'pyinotify',
+    'redis',
     'setuptools',
-    ],
+    ]
 
 tests_require = [
     'coverage',
@@ -24,10 +25,10 @@ setup(name='watchman',
       description="TODO",
       long_description=long_description,
       # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
-      classifiers=[],
+      classifiers=['Programming Language :: Python'],
       keywords=[],
-      author='TODO',
-      author_email='TODO@nelen-schuurmans.nl',
+      author='Carsten Byrman',
+      author_email='carsten.byrman@nelen-schuurmans.nl',
       url='',
       license='GPL',
       packages=['watchman'],

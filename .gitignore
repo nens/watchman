@@ -42,4 +42,7 @@ local*settings*.py
 .vagrant/
 Vagrantfile
 
-watchman/celeryconfig-example.py
+# Watchman
+buildout.cfg
+watchman/celeryconfig.py
+watchman/config.py
