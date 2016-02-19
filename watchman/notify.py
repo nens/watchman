@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 import fnmatch
 import logging.config
+import shutil
 
 import pyinotify
 
@@ -26,12 +27,22 @@ class FileHandler(pyinotify.ProcessEvent):
 
     """
     def process_IN_CLOSE_WRITE(self, event):
+        src = event.pathname
+        logger.debug('src = %s', src)
         filename = event.name.lower()
         for pattern in cfg.PATTERNS.viewkeys():
             if fnmatch.fnmatch(filename, pattern):
-                taskname = cfg.PATTERNS[pattern]
-                app.send_task(taskname, args=[event.pathname])
-                break
+                try:
+                    taskname = cfg.PATTERNS[pattern]
+                    dst = src.replace('/data/ftp', '/isilon/sftp', 1)
+                    logger.debug('dst = %s', dst)
+                    shutil.move(src, dst)
+                    logger.debug('task = %s', taskname)
+                    app.send_task(taskname, args=[dst])
+                except Exception as e:
+                    logger.exception(e)
+                finally:
+                    break
 
 
 def get_notifier():
