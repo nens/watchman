@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 import fnmatch
 import logging.config
+import os
 import shutil
 
 import pyinotify
@@ -16,6 +17,19 @@ from . import config as cfg
 from .celery import app
 
 logger = logging.getLogger(__name__)
+
+
+def mkdir(path):
+    if not os.path.exists(path):
+        logger.debug('Creating directory %s', path)
+        os.makedirs(path)
+    else:
+        assert(os.path.isdir(path))
+
+
+def move(src, dst):
+    logger.info('Moving %s to %s', src, dst)
+    shutil.move(src, dst)
 
 
 class FileHandler(pyinotify.ProcessEvent):
@@ -27,20 +41,36 @@ class FileHandler(pyinotify.ProcessEvent):
 
     """
     def process_IN_CLOSE_WRITE(self, event):
-        src = event.pathname
-        logger.debug('src = %s', src)
+
+        logger.info('Notified of %s', event.pathname)
+
+        # Some setups require a file to be moved to a shared location first.
+
+        if event.path in cfg.MOVES:
+            src = event.pathname
+            dst = cfg.MOVES[event.path]
+            try:
+                mkdir(dst)
+                move(src, dst)
+            except Exception as e:
+                logger.error(e)
+                return
+            pathname = os.path.join(dst, event.name)
+        else:
+            pathname = event.pathname
+
+        # Now that the file has been moved, notify the task server.
+
         filename = event.name.lower()
+
         for pattern in cfg.PATTERNS.viewkeys():
             if fnmatch.fnmatch(filename, pattern):
                 try:
                     taskname = cfg.PATTERNS[pattern]
-                    dst = src.replace('/data/ftp', '/isilon/sftp', 1)
-                    logger.debug('dst = %s', dst)
-                    shutil.move(src, dst)
-                    logger.debug('task = %s', taskname)
-                    app.send_task(taskname, args=[dst])
+                    logger.info('Sending task %s', taskname)
+                    app.send_task(taskname, args=[pathname])
                 except Exception as e:
-                    logger.exception(e)
+                    logger.error(e)
                 finally:
                     break
 
@@ -60,6 +90,7 @@ def get_notifier():
 
 
 def main():
+    logging.config.dictConfig(cfg.LOGGING)
     notifier = get_notifier()
     notifier.loop()
 
