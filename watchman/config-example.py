@@ -40,11 +40,11 @@ LOGGING = {
 
 # https://docs.python.org/2/library/fnmatch.html
 # Order does matter: most specific first.
-PATTERNS = OrderedDict(
+PATTERNS = OrderedDict([
     ('*/events/*.csv', 'proj.tasks.import_events'),
     ('*.csv', 'proj.tasks.import_timeseries'),
     ('*', 'proj.tasks.echo'),
-)
+])
 
 # http://seb-m.github.io/pyinotify/
 WATCHES = [
