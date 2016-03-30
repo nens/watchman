@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections import OrderedDict
 import os
 
 SETTINGS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -38,14 +39,17 @@ LOGGING = {
 }
 
 # https://docs.python.org/2/library/fnmatch.html
-PATTERNS = {
-    '*': 'proj.tasks.echo',
-}
+# Order does matter: most specific first.
+PATTERNS = OrderedDict(
+    ('*/events/*.csv', 'proj.tasks.import_events'),
+    ('*.csv', 'proj.tasks.import_timeseries'),
+    ('*', 'proj.tasks.echo'),
+)
 
 # http://seb-m.github.io/pyinotify/
 WATCHES = [
     {'path': '/foo'},
-    {'path': '/bar'},
+    {'path': '/bar', 'rec': True},
 ]
 
 # Files may be moved beforehand.
