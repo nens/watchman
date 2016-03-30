@@ -1,43 +1,68 @@
 watchman
 ==========================================
 
-Introduction
+Watch directories for new files and send tasks to a queue for futher
+asynchronous processing.
 
-Usage, etc.
+
+Building watchman
+-----------------
+
+::
+
+    git clone git@github.com:nens/watchman.git
+    cd watchman
+    ln -s profiles/development.cfg buildout.cfg
+    python bootstrap.py
+    bin/buildout
 
 
-Post-nensskel setup TODO
-------------------------
+Configuring watchman
+--------------------
 
-Here are some instructions on what to do after you've created the project with
-nensskel.
+Firstly, copy celeryconfig-example.py to celeryconfig.py and configure the
+location of your Celery broker, for example::
 
-- Fill in a short description on https://github.com/lizardsystem/watchman or
-  https://github.com/nens/watchman if you haven't done so already.
+    BROKER_URL = "redis://localhost:6379/0"
 
-- Use the same description in the ``setup.py``'s "description" field.
+Secondly, copy config-example.py to config.py and configure logging and
+pyinotify.
 
-- Fill in your username and email address in the ``setup.py``, see the
-  ``TODO`` fields. If you use it, also check the ``bower.json``.
+WATCHES lists the directories to monitor for new files::
 
-- Also add your name to ``CREDITS.rst``. It is open source software, so you
-  should claim credit!
+    WATCHES = [
+        {'path': '/foo'},
+        {'path': '/bar', 'rec': True},  # watch subdirectories too
+    ]
 
-- Check https://github.com/nens/watchman/settings/collaboration if the team
-  "Nelen & Schuurmans" has access.
+PATTERNS maps file extensions on Celery tasks::
 
-- Add a new jenkins job at
-  http://buildbot.lizardsystem.nl/jenkins/view/djangoapps/newJob or
-  http://buildbot.lizardsystem.nl/jenkins/view/libraries/newJob . Job name
-  should be "watchman", make the project a copy of the existing "lizard-wms"
-  project (for django apps) or "nensskel" (for libraries). On the next page,
-  change the "github project" to ``https://github.com/nens/watchman/`` and
-  "repository url" fields to ``git@github.com:nens/watchman.git`` (you might
-  need to replace "nens" with "lizardsystem"). The rest of the settings should
-  be OK.
+    PATTERNS = {
+        '*': 'proj.tasks.echo',
+    }
 
-- The project is prepared to be translated with Lizard's
-  `Transifex <http://translations.lizard.net/>`_ server. For details about
-  pushing translation files to and fetching translation files from the
-  Transifex server, see the ``nens/translations`` `documentation
-  <https://github.com/nens/translations/blob/master/README.rst>`_.
+Sometimes order matters::
+
+    PATTERNS = OrderedDict([
+        ('*/events/*.csv', 'proj.tasks.import_events'),
+        ('*.csv', 'proj.tasks.import_timeseries'),
+    ])
+
+New files may be moved to another location (e.g. permanent storage) before
+submitting tasks. This is optional::
+
+    MOVES = {
+        '/foo': '/isilon/foo',
+    }
+
+
+Running watchman
+----------------
+
+Interactively::
+
+    bin/notify
+
+Daemonized::
+
+    bin/supervisord

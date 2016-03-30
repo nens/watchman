@@ -22,7 +22,9 @@ tests_require = [
 
 setup(name='watchman',
       version=version,
-      description="TODO",
+      description=(
+          "Watch directories for new files and send tasks to a queue "
+          "for futher asynchronous processing."),
       long_description=long_description,
       # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=['Programming Language :: Python'],

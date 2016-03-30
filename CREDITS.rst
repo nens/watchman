@@ -1,4 +1,4 @@
 Credits
 =======
 
-- TODO started this library
+- Nelen & Schuurmans
