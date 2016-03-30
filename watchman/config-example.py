@@ -49,7 +49,7 @@ PATTERNS = OrderedDict([
 # http://seb-m.github.io/pyinotify/
 WATCHES = [
     {'path': '/foo'},
-    {'path': '/bar', 'rec': True},
+    {'path': '/bar', 'rec': True},  # watch subdirectories too
 ]
 
 # Files may be moved beforehand.
