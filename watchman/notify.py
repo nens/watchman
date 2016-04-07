@@ -61,10 +61,8 @@ class FileHandler(pyinotify.ProcessEvent):
 
         # Now that the file has been moved, notify the task server.
 
-        pathname = event.pathname.lower()
-
         for pattern in cfg.PATTERNS:
-            if fnmatch.fnmatch(pathname, pattern):
+            if fnmatch.fnmatch(pathname.lower(), pattern):
                 try:
                     taskname = cfg.PATTERNS[pattern]
                     logger.info('Sending task %s', taskname)
