@@ -58,9 +58,3 @@ MOVES = {
     '/foo': '/isilon/foo',
     '/bar': '/isilon/bar',
 }
-
-# Keyword arguments to pass on to the task.
-# This is optional.
-TASK_KWARGS = {
-    'proj.tasks.import_events': {'queue': 'low_priority'},
-}

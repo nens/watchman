@@ -65,9 +65,8 @@ class FileHandler(pyinotify.ProcessEvent):
             if fnmatch.fnmatch(pathname.lower(), pattern):
                 try:
                     taskname = cfg.PATTERNS[pattern]
-                    kwargs = cfg.TASK_KWARGS.get(taskname, {})
                     logger.info('Sending task %s', taskname)
-                    app.send_task(taskname, [pathname], kwargs)
+                    app.send_task(taskname, args=[pathname])
                 except Exception as e:
                     logger.error(e)
                 finally:
