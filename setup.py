@@ -12,6 +12,7 @@ install_requires = [
     'celery',
     'kombu',
     'pyinotify',
+    'redis',
     'setuptools',
     ]
 
