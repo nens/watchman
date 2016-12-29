@@ -13,21 +13,21 @@ Building watchman
 
 Development with Vagrant, virtualenv, etc::
 
-    git clone git@github.com:nens/watchman.git
-    cd watchman
-    ln -s profiles/development.cfg buildout.cfg
-    python bootstrap.py
-    bin/buildout
+    $ git clone git@github.com:nens/watchman.git
+    $ cd watchman
+    $ ln -s profiles/development.cfg buildout.cfg
+    $ python bootstrap.py
+    $ bin/buildout
 
 Development with Docker::
 
-    git clone git@github.com:nens/watchman.git
-    cd watchman
-    ln -s profiles/development.cfg buildout.cfg
-    docker-compose build
-    docker volume create --name=ftproot
-    docker-compose run --rm watchman python bootstrap.py
-    docker-compose run --rm watchman bin/buildout
+    $ git clone git@github.com:nens/watchman.git
+    $ cd watchman
+    $ ln -s profiles/development.cfg buildout.cfg
+    $ docker-compose build
+    $ docker volume create --name=ftproot
+    $ docker-compose run --rm watchman python bootstrap.py
+    $ docker-compose run --rm watchman bin/buildout
 
 NB: We share the volume `ftproot` with another Docker project. Adjust to your
 needs.
@@ -100,21 +100,21 @@ Running watchman
 
 Interactively::
 
-    bin/notify
+    $ bin/notify
 
 Daemonized::
 
-    bin/supervisord
+    $ bin/supervisord
 
 Development with docker::
 
-    docker-compose up
+    $ docker-compose up
 
 Verify that it works::
 
-    docker exec -it watchman_watchman_1 /bin/bash
-    cd /srv/ftp
-    touch data.csv
+    $ docker exec -it watchman_watchman_1 /bin/bash
+    $ cd /srv/ftp
+    $ touch data.csv
 
 The log window should display something like this::
 
