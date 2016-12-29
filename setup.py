@@ -10,8 +10,8 @@ long_description = '\n\n'.join([
 
 install_requires = [
     'celery',
+    'kombu',
     'pyinotify',
-    'redis',
     'setuptools',
     ]
 

@@ -7,8 +7,16 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from celery import Celery
+from kombu.connection import Connection
 
 from . import celeryconfig
+from . import config
 
 app = Celery()
 app.config_from_object(celeryconfig)
+
+CONNECTION_POOLS = {
+    broker_name: Connection(broker_url).ChannelPool()
+    for broker_name, broker_url
+    in config.BROKERS.items()
+}

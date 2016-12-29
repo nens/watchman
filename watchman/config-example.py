@@ -38,22 +38,22 @@ LOGGING = {
     },
 }
 
-# https://docs.python.org/2/library/fnmatch.html
-# Order does matter: most specific first.
-PATTERNS = OrderedDict([
-    ('*/events/*.csv', 'proj.tasks.import_events'),
-    ('*.csv', 'proj.tasks.import_timeseries'),
-    ('*', 'proj.tasks.echo'),
-])
+ProFTPD = True
 
-# http://seb-m.github.io/pyinotify/
+BROKERS = {
+    '3di': 'redis://redis:6379/0',
+    'lizard': 'amqp://guest:guest@rabbitmq:5672//',
+}
+
 WATCHES = [
-    {'path': '/foo'},
-    {'path': '/bar', 'rec': True},  # watch subdirectories too
+    {'path': '/srv/ftp', 'rec': True, 'auto_add': True},
 ]
 
-# Files may be moved beforehand.
-# This is optional.
+PATTERNS = OrderedDict([
+    ('/srv/ftp/*.csv', {'broker': 'lizard', 'task': 'lizard_task'}),
+    ('/srv/ftp/*.nc', {'broker': '3di', 'task': '3di_task'}),
+])
+
 MOVES = {
     '/foo': '/isilon/foo',
     '/bar': '/isilon/bar',

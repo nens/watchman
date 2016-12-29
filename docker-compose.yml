@@ -1,0 +1,22 @@
+version: '2'
+services:
+
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+
+  watchman:
+    build: .
+    command: "bin/notify"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - .:/code
+      - ftproot:/srv/ftp
+    depends_on:
+      - rabbitmq
+
+volumes:
+  ftproot:
+    external: true

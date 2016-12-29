@@ -14,6 +14,7 @@ import shutil
 import pyinotify
 
 from . import config as cfg
+from .celery import CONNECTION_POOLS
 from .celery import app
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,35 @@ class FileHandler(pyinotify.ProcessEvent):
     multiple matches.
 
     """
+    ProFTPD = getattr(cfg, 'ProFTPD', False)
+
+    def my_init(self, watch_manager={}):
+        # The recommended way is not to override __init__ in your
+        # subclass, but to define a my_init() method instead.
+        # See pyinotify.ProcessEvent.
+        self.wm = watch_manager
+
+    def process_default(self, event):
+        # If we are not watching directories created by ProFTPD,
+        # return immediately.
+        if not FileHandler.ProFTPD:
+            return
+        # Directory creation by ProFTPD is a two-step process. First a hidden
+        # directory is created, e.g. `.dstXXX59N0g9`. Then, this directory
+        # is renamed. This screws up the `auto_add` feature of pyinotify,
+        # which automatically adds watches on newly created directories:
+        # by the time pyinotify tries to add a watch, the dot folder
+        # doesn't exist anymore, leaving the directory unwatched.
+        if event.mask == pyinotify.IN_MOVED_TO | pyinotify.IN_ISDIR:
+            if os.path.basename(event.src_pathname).startswith(".dst"):
+                watches = {w.path: w for w in self.wm.watches.values()}
+                parent_dir = os.path.dirname(event.pathname)
+                parent_watch = watches.get(parent_dir)
+                if (parent_watch and parent_watch.auto_add
+                        and event.pathname not in watches):
+                    self.wm.add_watch(
+                        event.pathname, parent_watch.mask, auto_add=True)
+
     def process_IN_CLOSE_WRITE(self, event):
 
         logger.info('Notified of %s', event.pathname)
@@ -61,15 +91,19 @@ class FileHandler(pyinotify.ProcessEvent):
 
         # Now that the file has been moved, notify the task server.
 
-        for pattern in cfg.PATTERNS:
-            if fnmatch.fnmatch(pathname.lower(), pattern):
+        for pattern, data in cfg.PATTERNS.iteritems():
+            if fnmatch.fnmatch(pathname, pattern):
                 try:
-                    taskname = cfg.PATTERNS[pattern]
-                    logger.info('Sending task %s', taskname)
-                    app.send_task(taskname, args=[pathname])
+                    task = data['task']
+                    broker = data['broker']
+                    pool = CONNECTION_POOLS[broker]
+                    connection = pool.acquire()
+                    logger.info('Sending task %s', task)
+                    app.send_task(task, args=[pathname], connection=connection)
                 except Exception as e:
                     logger.error(e)
                 finally:
+                    connection.release()
                     break
 
 
@@ -81,9 +115,10 @@ def get_notifier():
 
     """
     wm = pyinotify.WatchManager()
+    mask = pyinotify.ALL_EVENTS
     for watch in cfg.WATCHES:
-        wm.add_watch(mask=pyinotify.IN_CLOSE_WRITE, **watch)
-    notifier = pyinotify.Notifier(wm, FileHandler())
+        wm.add_watch(mask=mask, **watch)
+    notifier = pyinotify.Notifier(wm, FileHandler(watch_manager=wm))
     return notifier
 
 
