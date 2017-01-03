@@ -76,23 +76,29 @@ class FileHandler(pyinotify.ProcessEvent):
 
         # Some setups require a file to be moved to a shared location first.
 
-        if event.path in cfg.MOVES:
-            src = event.pathname
-            dst = cfg.MOVES[event.path]
-            try:
-                mkdir(dst)
-                move(src, dst)
-            except Exception as e:
-                logger.error(e)
-                return
-            pathname = os.path.join(dst, event.name)
-        else:
-            pathname = event.pathname
+        # If k = '/srv/ftp' and v = '/isilon/prod/data',
+        # then '/srv/ftp/username/lizard/events.csv'
+        # will be moved to '/isilon/prod/data/username/lizard/events.csv'.
+
+        pathname = event.pathname
+        for k, v in cfg.MOVES.items():
+            if event.pathname.startswith(k):
+                src = event.pathname
+                sub = event.path[len(k):].lstrip('/')
+                dst = os.path.join(v, sub)
+                try:
+                    mkdir(dst)
+                    move(src, dst)
+                except Exception as e:
+                    logger.error(e)
+                    return
+                pathname = os.path.join(dst, event.name)
+                break
 
         # Now that the file has been moved, notify the task server.
 
         for pattern, data in cfg.PATTERNS.iteritems():
-            if fnmatch.fnmatch(pathname, pattern):
+            if fnmatch.fnmatch(event.pathname, pattern):
                 try:
                     task = data['task']
                     broker = data['broker']
