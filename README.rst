@@ -103,8 +103,9 @@ submitting tasks. This is optional (you may leave this dictionary empty)::
         '/srv/ftp': '/isilon/foo/bar',
     }
 
-This will move /srv/ftp/username/lizard/events.csv to
-/isilon/foo/bar/username/lizard/events.csv before sending the task.
+This will move ``/srv/ftp/username/lizard/events.csv`` to
+``/isilon/foo/bar/username/lizard/events.csv``
+before sending the task.
 
 Running watchman
 ----------------
