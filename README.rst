@@ -41,6 +41,13 @@ for example::
 
     CELERYD_HIJACK_ROOT_LOGGER = False
 
+By default, tasks are sent to a queue named "celery". If a task needs to be
+routed to a specific queue, this may be done as follows::
+
+    CELERY_ROUTES = {
+        'lizard_nxt.tasks.import_raster_task': {'queue': 'single_worker'},
+    }
+
 Since multiple brokers are supported, do not define a `BROKER_URL` here as you
 would typically do when working with Celery. (NB: This setting supports a
 list of broker URLs, but this is for use in a failover strategy.)
