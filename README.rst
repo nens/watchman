@@ -48,6 +48,8 @@ routed to a specific queue, this may be done as follows::
         'lizard_nxt.tasks.import_raster_task': {'queue': 'single_worker'},
     }
 
+NB: Celery v4 uses new lowercase settings. Check out the documentation.
+
 Since multiple brokers are supported, do not define a `BROKER_URL` here as you
 would typically do when working with Celery. (NB: This setting supports a
 list of broker URLs, but this is for use in a failover strategy.)
