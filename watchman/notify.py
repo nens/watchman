@@ -88,6 +88,8 @@ class FileHandler(pyinotify.ProcessEvent):
                 dst = os.path.join(v, sub)
                 try:
                     mkdir(dst)
+                    mkdir(os.path.join(dst, 'accepted'))
+                    mkdir(os.path.join(dst, 'rejected'))
                     move(src, dst)
                 except Exception as e:
                     logger.error(e)
