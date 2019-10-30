@@ -13,3 +13,7 @@ Changelog of watchman
 
 - Match relevant library versions with those of lizard-nxt to prevent this
   issue https://github.com/celery/celery/issues/4356.
+
+- Bumped celery to 4.3
+
+- Fixed bug with undefined connection.

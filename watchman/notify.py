@@ -101,6 +101,7 @@ class FileHandler(pyinotify.ProcessEvent):
 
         for pattern, data in cfg.PATTERNS.iteritems():
             if fnmatch.fnmatch(event.pathname, pattern):
+                connection = None
                 try:
                     task = data['task']
                     broker = data['broker']
@@ -111,7 +112,8 @@ class FileHandler(pyinotify.ProcessEvent):
                 except Exception as e:
                     logger.error(e)
                 finally:
-                    connection.release()
+                    if connection is not None:
+                        connection.release()
                     break
 
 
