@@ -13,7 +13,7 @@ from . import celeryconfig
 from . import config
 
 app = Celery()
-app.config_from_object(celeryconfig)
+app.config_from_object(celeryconfig, namespace="CELERY")
 
 CONNECTION_POOLS = {
     broker_name: Connection(broker_url).ChannelPool()
