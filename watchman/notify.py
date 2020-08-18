@@ -10,6 +10,7 @@ import fnmatch
 import logging.config
 import os
 import shutil
+import time
 
 import pyinotify
 
@@ -32,6 +33,15 @@ def move(src, dst):
     logger.info('Moving %s to %s', src, dst)
     shutil.move(src, dst)
 
+
+def uniquify(filename):
+    """Make a filename unique by adding milliseconds since epoch.
+
+    For example: foo.txt => foo@1596705456400.txt
+    """
+    root, ext = os.path.splitext(filename)  # foo.txt => ('foo', '.txt')
+    ms = time.time() * 1000  # milliseconds since epoch as a float
+    return "{root}@{ms:.0f}{ext}".format(root=root, ms=ms, ext=ext)
 
 class FileHandler(pyinotify.ProcessEvent):
     """An event handler for new/updated files.
@@ -76,9 +86,10 @@ class FileHandler(pyinotify.ProcessEvent):
 
         # Some setups require a file to be moved to a shared location first.
 
-        # If k = '/srv/ftp' and v = '/isilon/prod/data',
-        # then '/srv/ftp/username/lizard/events.csv'
-        # will be moved to '/isilon/prod/data/username/lizard/events.csv'.
+        # If k = '/srv/ftp' and v = '/isilon/prod/data', then
+        # '/srv/ftp/username/lizard/events.csv' will be moved to
+        # '/isilon/prod/data/username/lizard/events@1596699866190.csv'.
+        # The @milliseconds part is added to prevent filename clashes.
 
         pathname = event.pathname
         for k, v in cfg.MOVES.items():
@@ -90,11 +101,12 @@ class FileHandler(pyinotify.ProcessEvent):
                     mkdir(dst)
                     mkdir(os.path.join(dst, 'accepted'))
                     mkdir(os.path.join(dst, 'rejected'))
-                    move(src, dst)
+                    filename = uniquify(event.name)
+                    pathname = os.path.join(dst, filename)
+                    move(src, pathname)
                 except Exception as e:
                     logger.error(e)
                     return
-                pathname = os.path.join(dst, event.name)
                 break
 
         # Now that the file has been moved, notify the task server.

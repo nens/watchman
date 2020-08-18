@@ -17,3 +17,5 @@ Changelog of watchman
 - Bumped celery to 4.3
 
 - Fixed bug with undefined connection.
+
+- Uniquify filenames when copying to long-term storage.
