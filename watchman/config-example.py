@@ -50,6 +50,8 @@ WATCHES = [
 ]
 
 PATTERNS = OrderedDict([
+    ('/srv/ftp/priority-user/*.csv', {'broker': 'lizard', 'task': 'lizard_task', 'kwargs': {'priority': 5}}),
+    ('/srv/ftp/expiring-import/*.csv', {'broker': 'lizard', 'task': 'lizard_task', 'kwargs': {'expires': 300}}),
     ('/srv/ftp/*.csv', {'broker': 'lizard', 'task': 'lizard_task'}),
     ('/srv/ftp/*.nc', {'broker': '3di', 'task': '3di_task'}),
 ])

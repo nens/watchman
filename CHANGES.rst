@@ -19,3 +19,6 @@ Changelog of watchman
 - Fixed bug with undefined connection.
 
 - Uniquify filenames when copying to long-term storage.
+
+- Add a 'kwargs' key to the PATTERNS in the celery config. This enables setting
+  custom priority, queue, expires, etc. for some path patterns.

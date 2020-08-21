@@ -46,3 +46,7 @@ Vagrantfile
 buildout.cfg
 watchman/celeryconfig.py
 watchman/config.py
+
+# IDEs
+.idea
+.vscode

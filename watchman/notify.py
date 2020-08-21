@@ -117,10 +117,11 @@ class FileHandler(pyinotify.ProcessEvent):
                 try:
                     task = data['task']
                     broker = data['broker']
+                    kwargs = data.get('kwargs', {})
                     pool = CONNECTION_POOLS[broker]
                     connection = pool.acquire()
                     logger.info('Sending task %s', task)
-                    app.send_task(task, args=[pathname], connection=connection)
+                    app.send_task(task, args=[pathname], connection=connection, **kwargs)
                 except Exception as e:
                     logger.error(e)
                 finally:
